@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Expense Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="hidden"> <!-- Hidden until auth check -->
+    <div class="dashboard-container">
+        <!-- Sidebar / Header -->
+        <div class="sidebar">
+            <h2><i class="fas fa-wallet"></i> MyWallet</h2>
+            <div style="margin-bottom: 20px;">
+                <select id="currency-selector" class="currency-selector">
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="GBP">GBP (£)</option>
+                    <option value="INR">INR (₹)</option>
+                    <option value="JPY">JPY (¥)</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <p>Welcome, <strong id="user-display">User</strong></p>
+                <button onclick="logout()" style="background: var(--danger-color); margin-top: 10px;">Logout</button>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <h3>Total Balance</h3>
+                    <p id="total-balance" style="font-size: 1.5rem; font-weight: bold;">$0.00</p>
+                </div>
+                <div class="stat-item" style="color: var(--success-color);">
+                    <h4>Income</h4>
+                    <p id="total-income">+$0.00</p>
+                </div>
+                <div class="stat-item" style="color: var(--danger-color);">
+                    <h4>Expense</h4>
+                    <p id="total-expense">-$0.00</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Add Expense Form -->
+            <div class="expense-form card">
+                <h3>Add New Transaction</h3>
+                <form id="add-expense-form">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <input type="text" id="desc" placeholder="Description" required>
+                        <input type="number" id="amount" placeholder="Amount" step="0.01" required>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <select id="category" required>
+                            <option value="">Select Category</option>
+                            <!-- Populated by JS -->
+                        </select>
+                        <input type="date" id="date" required>
+                    </div>
+                    <button type="submit">Add Transaction</button>
+                </form>
+            </div>
+
+            <!-- Charts -->
+            <div class="card">
+                <h3>Monthly Summary</h3>
+                <div class="charts-container">
+                    <canvas id="expenseChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="card">
+                <h3>Recent Transactions</h3>
+                <ul id="expense-list" class="expense-list">
+                    <!-- Populated by JS -->
+                </ul>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

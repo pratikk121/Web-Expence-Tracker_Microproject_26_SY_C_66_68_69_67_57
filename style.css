@@ -1,0 +1,215 @@
+:root {
+    --bg-color: #f0f2f5;
+    --text-color: #333;
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --primary-color: #4e54c8;
+    --secondary-color: #8f94fb;
+    --accent-color: #ff6b6b;
+    --success-color: #2ecc71;
+    --danger-color: #e74c3c;
+    --glass-border: 1px solid rgba(255, 255, 255, 0.3);
+    --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #1a1a2e;
+        --text-color: #e0e0e0;
+        --card-bg: rgba(22, 33, 62, 0.8);
+        --primary-color: #0f3460;
+        --secondary-color: #e94560;
+        --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+        --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background-attachment: fixed;
+    color: var(--text-color);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-container,
+.dashboard-container {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: var(--glass-border);
+    box-shadow: var(--shadow);
+    padding: 2rem;
+    width: 90%;
+    max-width: 400px;
+    /* Auth default */
+    text-align: center;
+    margin: 20px;
+}
+
+.dashboard-container {
+    max-width: 1200px;
+    display: grid;
+    grid-template-columns: 1fr;
+    /* Mobile first */
+    gap: 20px;
+    text-align: left;
+}
+
+@media (min-width: 768px) {
+    .dashboard-container {
+        grid-template-columns: 300px 1fr;
+    }
+}
+
+h1,
+h2 {
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+}
+
+input,
+select,
+button {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 1rem;
+    outline: none;
+    transition: 0.3s;
+}
+
+input,
+select {
+    background: rgba(255, 255, 255, 0.1);
+    /* Glassy input */
+    color: var(--text-color);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+input:focus,
+select:focus {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: var(--secondary-color);
+}
+
+button {
+    background: var(--primary-color);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+}
+
+button:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+}
+
+a {
+    color: var(--secondary-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Dashboard specific */
+.expense-form {
+    grid-column: 1 / -1;
+}
+
+@media (min-width: 768px) {
+    .expense-form {
+        grid-column: 1;
+    }
+}
+
+.expense-list {
+    list-style: none;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.expense-item {
+    background: rgba(255, 255, 255, 0.05);
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.expense-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.expense-amount {
+    font-weight: bold;
+    color: var(--danger-color);
+    /* Assuming expense mostly */
+}
+
+.expense-amount.income {
+    color: var(--success-color);
+}
+
+.charts-container {
+    height: 300px;
+    width: 100%;
+}
+
+.sidebar {
+    background: rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    border-radius: 15px;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Utilities */
+.hidden {
+    display: none !important;
+}
+
+.text-danger {
+    color: var(--danger-color);
+}
+
+/* Currency Selector */
+.currency-selector {
+    padding: 8px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
+    width: auto;
+    display: inline-block;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+.currency-selector option {
+    background: var(--bg-color);
+    color: var(--text-color);
+}
