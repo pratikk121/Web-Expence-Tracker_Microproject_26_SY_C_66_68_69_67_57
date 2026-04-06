@@ -43,6 +43,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Attach Event Listener
     const form = document.getElementById('add-expense-form');
     if (form) form.addEventListener('submit', addExpense);
+
+    const editForm = document.getElementById('edit-expense-form');
+    if (editForm) editForm.addEventListener('submit', updateExpense);
 });
 
 async function fetchRates() {
@@ -114,7 +117,10 @@ function renderExpenses() {
             </div>
             <div style="display: flex; align-items: center; gap: 10px;">
                 <span class="expense-amount ${colorClass}">${sign}${formattedAmount}</span>
-                <button onclick="deleteExpense(${exp.id})" style="background: var(--danger-color); padding: 5px 10px; border-radius: 5px; font-size: 0.8rem;">
+                <button onclick="openEditModal(${exp.id})" style="background: var(--primary-color); padding: 5px 10px; border-radius: 5px; font-size: 0.8rem;" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button onclick="deleteExpense(${exp.id})" style="background: var(--danger-color); padding: 5px 10px; border-radius: 5px; font-size: 0.8rem;" title="Delete">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -206,10 +212,17 @@ function renderChart() {
 async function addExpense(e) {
     e.preventDefault();
 
-    const desc = document.getElementById('desc').value;
+    const desc = document.getElementById('desc').value.trim();
     const rawAmount = parseFloat(document.getElementById('amount').value);
     const category = document.getElementById('category').value;
     const date = document.getElementById('date').value;
+
+    // Client-side validation
+    if (!desc || isNaN(rawAmount) || rawAmount <= 0 || !category || !date) {
+        alert("Please fill out all fields correctly. Amount must be positive.");
+        return;
+    }
+
 
     // Convert BACK to USD before saving, IF usage assumes DB stores USD.
     // However, user enters amount in "current currency"? Usually yes.
@@ -255,5 +268,66 @@ async function deleteExpense(id) {
         loadExpenses();
     } else {
         alert('Error deleting: ' + data.message);
+    }
+}
+
+// Edit Modal Logic
+function openEditModal(id) {
+    const exp = expensesData.find(e => e.id == id);
+    if (!exp) return;
+
+    document.getElementById('edit-id').value = exp.id;
+    document.getElementById('edit-desc').value = exp.description || '';
+
+    // Display amount converted back to currently selected currency
+    const rate = exchangeRates[currentCurrency] || 1;
+    document.getElementById('edit-amount').value = (parseFloat(exp.amount) * rate).toFixed(2);
+
+    // Copy options to edit category
+    const mainSelect = document.getElementById('category');
+    const editSelect = document.getElementById('edit-category');
+    editSelect.innerHTML = mainSelect.innerHTML;
+    editSelect.value = exp.category_id;
+
+    document.getElementById('edit-date').value = exp.date;
+
+    document.getElementById('edit-modal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+    document.getElementById('edit-modal').classList.add('hidden');
+    document.getElementById('edit-expense-form').reset();
+}
+
+async function updateExpense(e) {
+    e.preventDefault();
+
+    const id = document.getElementById('edit-id').value;
+    const desc = document.getElementById('edit-desc').value.trim();
+    const rawAmount = parseFloat(document.getElementById('edit-amount').value);
+    const category = document.getElementById('edit-category').value;
+    const date = document.getElementById('edit-date').value;
+
+    // Client-side validation
+    if (!desc || isNaN(rawAmount) || rawAmount <= 0 || !category || !date) {
+        alert("Please fill out all fields correctly. Amount must be positive.");
+        return;
+    }
+
+    const rate = exchangeRates[currentCurrency] || 1;
+    const amountInUSD = rawAmount / rate;
+
+    const res = await fetch('api/expenses.php', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, description: desc, amount: amountInUSD, category_id: category, date })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+        closeEditModal();
+        loadExpenses();
+    } else {
+        alert('Error: ' + data.message);
     }
 }

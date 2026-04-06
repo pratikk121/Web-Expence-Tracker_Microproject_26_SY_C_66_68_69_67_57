@@ -39,6 +39,13 @@ if ($method === 'GET') {
         $stmt = $conn->prepare($sql);
         $stmt->execute($params);
         $expenses = $stmt->fetchAll();
+        
+        // Output Sanitization for Frontend Protection
+        foreach ($expenses as &$exp) {
+            $exp['description'] = htmlspecialchars($exp['description'] ?? '', ENT_QUOTES, 'UTF-8');
+            $exp['category_name'] = htmlspecialchars($exp['category_name'] ?? '', ENT_QUOTES, 'UTF-8');
+        }
+        
         echo json_encode(['success' => true, 'data' => $expenses]);
     } catch (PDOException $e) {
         http_response_code(500);
@@ -52,11 +59,15 @@ if ($method === 'GET') {
     $description = $input['description'] ?? '';
     $date = $input['date'] ?? date('Y-m-d');
 
-    if (empty($amount) || empty($category_id) || empty($date)) {
+    // Server-side validation
+    if (empty($amount) || !is_numeric($amount) || $amount <= 0 || empty($category_id) || empty($date) || empty($description)) {
         http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'Missing required fields']);
+        echo json_encode(['success' => false, 'message' => 'Invalid or missing required fields']);
         exit();
     }
+    
+    // Sanitize input before DB (PDO already protects against SQLi, but good to strip tags)
+    $description = strip_tags($description);
 
     try {
         $stmt = $conn->prepare("INSERT INTO expenses (user_id, category_id, amount, description, date) VALUES (?, ?, ?, ?, ?)");
@@ -111,9 +122,19 @@ if ($method === 'GET') {
     $fields = [];
     $params = [];
 
-    if ($amount !== null) { $fields[] = "amount = ?"; $params[] = $amount; }
+    if ($amount !== null) { 
+        if(!is_numeric($amount) || $amount <= 0) {
+            http_response_code(400); echo json_encode(['success' => false, 'message' => 'Invalid amount']); exit();
+        }
+        $fields[] = "amount = ?"; $params[] = $amount; 
+    }
     if ($category_id !== null) { $fields[] = "category_id = ?"; $params[] = $category_id; }
-    if ($description !== null) { $fields[] = "description = ?"; $params[] = $description; }
+    if ($description !== null) { 
+        if(empty(trim($description))) {
+             http_response_code(400); echo json_encode(['success' => false, 'message' => 'Description cannot be empty']); exit();
+        }
+        $fields[] = "description = ?"; $params[] = strip_tags($description); 
+    }
     if ($date !== null) { $fields[] = "date = ?"; $params[] = $date; }
 
     if (empty($fields)) {

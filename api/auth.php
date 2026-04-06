@@ -23,6 +23,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             sendResponse(false, 'All fields are required');
         }
 
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            sendResponse(false, 'Invalid email format');
+        }
+
+        $username = htmlspecialchars(strip_tags($username), ENT_QUOTES, 'UTF-8');
+
         // Check if user exists
         $stmt = $conn->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
         $stmt->execute([$username, $email]);
@@ -58,7 +64,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($user && password_verify($password, $user['password_hash'])) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
-            sendResponse(true, 'Login successful', ['user' => ['id' => $user['id'], 'username' => $user['username']]]);
+            
+            // Sanitize output just to be absolutely safe
+            $safe_username = htmlspecialchars($user['username'], ENT_QUOTES, 'UTF-8');
+            sendResponse(true, 'Login successful', ['user' => ['id' => $user['id'], 'username' => $safe_username]]);
         } else {
             sendResponse(false, 'Invalid credentials');
         }
@@ -70,7 +79,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 } elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($action === 'check_session') {
         if (isset($_SESSION['user_id'])) {
-            sendResponse(true, 'Authenticated', ['user' => ['id' => $_SESSION['user_id'], 'username' => $_SESSION['username']]]);
+            $safe_username = htmlspecialchars($_SESSION['username'], ENT_QUOTES, 'UTF-8');
+            sendResponse(true, 'Authenticated', ['user' => ['id' => $_SESSION['user_id'], 'username' => $safe_username]]);
         } else {
             sendResponse(false, 'Not authenticated');
         }
