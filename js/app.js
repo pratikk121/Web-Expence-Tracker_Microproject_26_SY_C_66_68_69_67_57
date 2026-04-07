@@ -185,9 +185,14 @@ function renderExpenses() {
         const receiptIcon = exp.receipt_url ? `<a href="${exp.receipt_url}" target="_blank" style="margin-left:5px; color:#3498db;" title="View Receipt"><i class="fas fa-paperclip"></i></a>` : '';
 
         li.innerHTML = `
-            <div class="expense-info">
-                <strong>${exp.description || exp.category_name} ${pendingStar} ${receiptIcon}</strong>
-                <small>${exp.date} &bull; ${exp.category_name}</small>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="background: rgba(255,255,255,0.05); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1);">
+                    <i class="fas ${exp.category_icon || 'fa-tag'}"></i>
+                </div>
+                <div class="expense-info">
+                    <strong>${exp.description || exp.category_name} ${pendingStar} ${receiptIcon}</strong>
+                    <small>${exp.date}</small>
+                </div>
             </div>
             <div style="display: flex; align-items: center; gap: 10px;">
                 <span class="expense-amount ${colorClass}">${sign}${formattedAmount}</span>
