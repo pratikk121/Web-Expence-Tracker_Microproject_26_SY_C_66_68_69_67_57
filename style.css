@@ -1,37 +1,33 @@
 :root {
-    --bg-color: #f0f2f5;
-    --text-color: #333;
-    --card-bg: rgba(255, 255, 255, 0.9);
-    --primary-color: #4e54c8;
-    --secondary-color: #8f94fb;
-    --accent-color: #ff6b6b;
-    --success-color: #2ecc71;
-    --danger-color: #e74c3c;
-    --glass-border: 1px solid rgba(255, 255, 255, 0.3);
-    --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-}
+    --bg-color: #050505;
+    --text-color: #ffffff;
+    --text-muted: #888888;
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --card-bg-hover: rgba(255, 255, 255, 0.08);
+    --primary-color: #ffffff;
+    --primary-text: #000000;
+    --secondary-color: #888888;
+    
+    /* Monochromatic semantic colors */
+    --success-color: #ffffff; /* Bright white for income */
+    --danger-color: #666666;  /* Dim gray for expense */
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --bg-color: #1a1a2e;
-        --text-color: #e0e0e0;
-        --card-bg: rgba(22, 33, 62, 0.8);
-        --primary-color: #0f3460;
-        --secondary-color: #e94560;
-        --glass-border: 1px solid rgba(255, 255, 255, 0.1);
-        --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-    }
+    --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+    --glass-border-strong: 1px solid rgba(255, 255, 255, 0.3);
+    --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
 }
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: radial-gradient(circle at 10% 20%, rgba(50, 50, 50, 0.5) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(80, 80, 80, 0.3) 0%, transparent 40%),
+                var(--bg-color);
     background-attachment: fixed;
     color: var(--text-color);
     min-height: 100vh;
@@ -41,93 +37,127 @@ body {
     justify-content: center;
 }
 
+/* Glassmorphic Containers */
 .auth-container,
 .dashboard-container {
     background: var(--card-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-radius: 20px;
     border: var(--glass-border);
     box-shadow: var(--shadow);
     padding: 2rem;
     width: 90%;
     max-width: 400px;
-    /* Auth default */
     text-align: center;
     margin: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Adds a subtle glare effect */
+.auth-container::before,
+.dashboard-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
+    transform: skewX(-25deg);
+    animation: glare 8s infinite;
+}
+
+@keyframes glare {
+    0% { left: -100%; }
+    20% { left: 200%; }
+    100% { left: 200%; }
 }
 
 .dashboard-container {
     max-width: 1200px;
     display: grid;
     grid-template-columns: 1fr;
-    /* Mobile first */
     gap: 20px;
     text-align: left;
 }
 
 @media (min-width: 768px) {
     .dashboard-container {
-        grid-template-columns: 300px 1fr;
+        grid-template-columns: 320px 1fr;
     }
 }
 
-h1,
-h2 {
+h1, h2, h3, h4 {
     margin-bottom: 1.5rem;
     color: var(--text-color);
+    font-weight: 300;
+    letter-spacing: 1px;
 }
 
 input,
 select,
 button {
     width: 100%;
-    padding: 12px;
+    padding: 14px;
     margin: 10px 0;
-    border-radius: 8px;
+    border-radius: 12px;
     border: 1px solid transparent;
     font-size: 1rem;
     outline: none;
-    transition: 0.3s;
+    transition: all 0.3s ease;
 }
 
 input,
 select {
-    background: rgba(255, 255, 255, 0.1);
-    /* Glassy input */
+    background: rgba(0, 0, 0, 0.4);
     color: var(--text-color);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: var(--glass-border);
 }
 
 input:focus,
 select:focus {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: var(--secondary-color);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--glass-border-strong);
+    box-shadow: 0 0 15px rgba(255,255,255,0.1);
 }
 
 button {
     background: var(--primary-color);
-    color: white;
-    font-weight: bold;
+    color: var(--primary-text);
+    font-weight: 600;
     cursor: pointer;
     border: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 button:hover {
-    filter: brightness(1.1);
+    background: #e0e0e0;
+    box-shadow: 0 0 20px rgba(255,255,255,0.2);
     transform: translateY(-2px);
 }
 
 a {
-    color: var(--secondary-color);
+    color: var(--text-muted);
     text-decoration: none;
+    transition: color 0.3s;
 }
 
 a:hover {
-    text-decoration: underline;
+    color: var(--text-color);
 }
 
 /* Dashboard specific */
+.expense-form, .card {
+    background: var(--card-bg);
+    border: var(--glass-border);
+    border-radius: 16px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+}
+
 .expense-form {
     grid-column: 1 / -1;
 }
@@ -142,16 +172,38 @@ a:hover {
     list-style: none;
     max-height: 400px;
     overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Custom Scrollbar */
+.expense-list::-webkit-scrollbar {
+    width: 6px;
+}
+.expense-list::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.02);
+    border-radius: 10px;
+}
+.expense-list::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
 }
 
 .expense-item {
-    background: rgba(255, 255, 255, 0.05);
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    margin-bottom: 12px;
+    padding: 15px;
+    border-radius: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border: 1px solid rgba(255,255,255,0.03);
+    transition: all 0.3s ease;
+}
+
+.expense-item:hover {
+    background: var(--card-bg-hover);
+    transform: translateX(5px);
+    border: var(--glass-border);
 }
 
 .expense-info {
@@ -159,10 +211,20 @@ a:hover {
     flex-direction: column;
 }
 
+.expense-info strong {
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+.expense-info small {
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
 .expense-amount {
-    font-weight: bold;
+    font-weight: 600;
+    font-size: 1.1rem;
     color: var(--danger-color);
-    /* Assuming expense mostly */
 }
 
 .expense-amount.income {
@@ -175,9 +237,24 @@ a:hover {
 }
 
 .sidebar {
-    background: rgba(0, 0, 0, 0.05);
-    padding: 20px;
-    border-radius: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 25px;
+    border-radius: 16px;
+    border: var(--glass-border);
+}
+
+.sidebar h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stat-item {
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.stat-item:last-child {
+    border-bottom: none;
 }
 
 .main-content {
@@ -197,10 +274,10 @@ a:hover {
 
 /* Currency Selector */
 .currency-selector {
-    padding: 8px;
+    padding: 8px 12px;
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.1);
+    border: var(--glass-border);
+    background: rgba(0, 0, 0, 0.4);
     color: var(--text-color);
     width: auto;
     display: inline-block;
@@ -210,7 +287,7 @@ a:hover {
 }
 
 .currency-selector option {
-    background: var(--bg-color);
+    background: #111111;
     color: var(--text-color);
 }
 
@@ -221,7 +298,8 @@ a:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -234,5 +312,26 @@ a:hover {
 
 .modal-content {
     margin: 0;
-    /* Override auth-container margin */
+}
+
+/* Offline Banner */
+.offline-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    color: var(--text-color);
+    text-align: center;
+    padding: 10px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    z-index: 9999;
+    border-bottom: var(--glass-border);
+    transition: transform 0.3s ease;
+}
+.offline-banner.hidden {
+    transform: translateY(-100%);
+    display: block !important;
 }
