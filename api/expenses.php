@@ -104,20 +104,21 @@ if ($method === 'GET') {
     }
 
 } elseif ($method === 'POST') {
-    $amount = $input['amount'] ?? '';
-    $category_id = $input['category_id'] ?? '';
-    $description = $input['description'] ?? '';
+    $amount = filter_var($input['amount'] ?? '', FILTER_VALIDATE_FLOAT);
+    $category_id = filter_var($input['category_id'] ?? '', FILTER_VALIDATE_INT);
+    $description = trim($input['description'] ?? '');
     $date = $input['date'] ?? date('Y-m-d');
     $receipt_base64 = $input['receipt_base64'] ?? '';
-    $recurring_period = $input['recurring_period'] ?? ''; // 'weekly', 'monthly', 'yearly', or ''
+    $recurring_period = $input['recurring_period'] ?? '';
 
-    if (empty($amount) || !is_numeric($amount) || $amount <= 0 || empty($category_id) || empty($date) || empty($description)) {
+    if ($amount === false || $amount <= 0 || $category_id === false || empty($date) || empty($description)) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Invalid or missing required fields']);
         exit();
     }
     
-    $description = strip_tags($description);
+    // Sanitize description for database storage
+    $description = htmlspecialchars($description, ENT_QUOTES, 'UTF-8');
     $receipt_url = uploadBase64Image($receipt_base64);
 
     try {
@@ -197,10 +198,12 @@ if ($method === 'GET') {
     }
     if ($category_id !== null) { $fields[] = "category_id = ?"; $params[] = $category_id; }
     if ($description !== null) { 
-        if(empty(trim($description))) {
+        $description = trim($description);
+        if(empty($description)) {
              http_response_code(400); echo json_encode(['success' => false, 'message' => 'Description cannot be empty']); exit();
         }
-        $fields[] = "description = ?"; $params[] = strip_tags($description); 
+        $fields[] = "description = ?"; 
+        $params[] = htmlspecialchars($description, ENT_QUOTES, 'UTF-8'); 
     }
     if ($date !== null) { $fields[] = "date = ?"; $params[] = $date; }
     if ($receipt_base64 !== null && !empty($receipt_base64)) {

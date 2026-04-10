@@ -6,6 +6,14 @@ const currencySymbols = { 'USD': '$', 'EUR': '€', 'GBP': '£', 'INR': '₹', '
 let monthlyBudget = null;
 let currentReceiptBase64 = '';
 
+// Helper to escape HTML and prevent XSS
+function escapeHTML(str) {
+    if (!str) return "";
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+}
+
 let offlineQueue = JSON.parse(localStorage.getItem('offlineQueue')) || [];
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -184,14 +192,17 @@ function renderExpenses() {
         const pendingStar = exp.id < 0 ? '<span title="Pending Sync" style="color:var(--text-muted);font-size:0.8rem;margin-left:5px;"><i class="fas fa-sync"></i></span>' : '';
         const receiptIcon = exp.receipt_url ? `<a href="${exp.receipt_url}" target="_blank" style="margin-left:5px; color:#3498db;" title="View Receipt"><i class="fas fa-paperclip"></i></a>` : '';
 
+        const safeDescription = escapeHTML(exp.description || exp.category_name);
+        const safeCategory = escapeHTML(exp.category_name);
+
         li.innerHTML = `
             <div style="display: flex; align-items: center; gap: 15px;">
                 <div style="background: rgba(255,255,255,0.05); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1);">
                     <i class="fas ${exp.category_icon || 'fa-tag'}"></i>
                 </div>
                 <div class="expense-info">
-                    <strong>${exp.description || exp.category_name} ${pendingStar} ${receiptIcon}</strong>
-                    <small>${exp.date}</small>
+                    <strong>${safeDescription} ${pendingStar} ${receiptIcon}</strong>
+                    <small>${escapeHTML(exp.date)}</small>
                 </div>
             </div>
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -355,7 +366,7 @@ async function addExpense(e) {
         const catData = getCategoryData(categoryId);
         const newExp = {
             id: fakeId,
-            description: desc,
+            description: desc, // description will be escaped during render
             amount: amountInUSD,
             category_id: categoryId,
             category_name: catData.name,
@@ -415,12 +426,15 @@ function openEditModal(id) {
     const rate = exchangeRates[currentCurrency] || 1;
     document.getElementById('edit-amount').value = (parseFloat(exp.amount) * rate).toFixed(2);
 
-    const mainSelect = document.getElementById('category');
     const editSelect = document.getElementById('edit-category');
-    editSelect.innerHTML = mainSelect.innerHTML;
-    editSelect.value = exp.category_id;
+    
+    // Safety check for category copying
+    if (mainSelect && editSelect) {
+        editSelect.innerHTML = mainSelect.innerHTML;
+        editSelect.value = exp.category_id;
+    }
 
-    document.getElementById('edit-date').value = exp.date;
+    document.getElementById('edit-date').value = escapeHTML(exp.date);
     document.getElementById('edit-modal').classList.remove('hidden');
 }
 
