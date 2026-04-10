@@ -26,6 +26,63 @@ function getAuthHeaders(additionalHeaders = {}) {
     return headers;
 }
 
+// Global Notification System
+function showToast(message, type = 'info', duration = 4000) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    let icon = 'fa-info-circle';
+    if (type === 'success') icon = 'fa-check-circle';
+    if (type === 'error') icon = 'fa-exclamation-triangle';
+
+    toast.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
+    
+    toast.onclick = () => {
+        toast.classList.add('hide');
+        setTimeout(() => toast.remove(), 400);
+    };
+
+    container.appendChild(toast);
+
+    if (duration > 0) {
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.classList.add('hide');
+                setTimeout(() => toast.remove(), 400);
+            }
+        }, duration);
+    }
+}
+
+// Centralized Response Handler
+async function handleResponse(res, customErrorMsg = 'An unexpected error occurred') {
+    if (res.status === 401) {
+        showToast('Session expired. Redirecting to login...', 'error');
+        setTimeout(() => window.location.href = 'login.html', 1500);
+        return null;
+    }
+    
+    if (res.status === 403) {
+        showToast('Security verification failed (CSRF). Please refresh and try again.', 'error');
+        return null;
+    }
+
+    try {
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+            showToast(data.message || customErrorMsg, 'error');
+            return null;
+        }
+        return data;
+    } catch (e) {
+        showToast(customErrorMsg, 'error');
+        return null;
+    }
+}
+
 let offlineQueue = JSON.parse(localStorage.getItem('offlineQueue')) || [];
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -351,7 +408,7 @@ async function addExpense(e) {
     const date = document.getElementById('date').value;
 
     if (!desc || isNaN(rawAmount) || rawAmount <= 0 || !categoryId || !date) {
-        alert("Please fill out all fields correctly.");
+        showToast("Please fill out all fields correctly.", "error");
         return;
     }
 
@@ -376,8 +433,8 @@ async function addExpense(e) {
             headers: getAuthHeaders(),
             body: JSON.stringify(payload)
         });
-        const data = await res.json();
-        if (data.success) {
+        const data = await handleResponse(res, 'Failed to add transaction');
+        if (data) {
             document.getElementById('add-expense-form').reset();
             document.getElementById('date').valueAsDate = new Date();
             
@@ -389,9 +446,8 @@ async function addExpense(e) {
             currentReceiptBase64 = '';
             if(document.getElementById('receipt-name')) document.getElementById('receipt-name').textContent = '';
 
+            showToast('Transaction added!', 'success');
             loadExpenses();
-        } else {
-            alert('Error: ' + data.message);
         }
     } catch(err) {
         // OFFLINE FALLBACK
@@ -437,11 +493,10 @@ async function deleteExpense(id) {
             method: 'DELETE',
             headers: getAuthHeaders()
         });
-        const data = await res.json();
-        if (data.success) {
+        const data = await handleResponse(res, 'Failed to delete transaction');
+        if (data) {
+            showToast('Transaction removed', 'info');
             loadExpenses();
-        } else {
-            alert('Error deleting: ' + data.message);
         }
     } catch(err) {
         // OFFLINE FALLBACK
@@ -489,7 +544,7 @@ async function updateExpense(e) {
     const date = document.getElementById('edit-date').value;
 
     if (!desc || isNaN(rawAmount) || rawAmount <= 0 || !categoryId || !date) {
-        alert("Please fill out all fields.");
+        showToast("Please fill out all fields correctly.", "error");
         return;
     }
 
@@ -516,12 +571,11 @@ async function updateExpense(e) {
             headers: getAuthHeaders(),
             body: JSON.stringify(payload)
         });
-        const data = await res.json();
-        if (data.success) {
+        const data = await handleResponse(res, 'Failed to update transaction');
+        if (data) {
+            showToast('Transaction updated', 'success');
             closeEditModal();
             loadExpenses();
-        } else {
-            alert('Error: ' + data.message);
         }
     } catch(err) {
         // OFFLINE FALLBACK
@@ -618,15 +672,15 @@ async function syncOfflineData() {
 // Notification Tracker Engine
 async function requestNotificationPermission() {
     if (!('Notification' in window)) {
-        alert('This browser does not support system notifications.');
+        showToast('This browser does not support system notifications.', 'info');
         return;
     }
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
-        alert('Reminders enabled!');
+        showToast('Reminders enabled!', 'success');
         checkDailyReminder();
     } else {
-        alert('Permission denied. Reminders will only appear inside the app.');
+        showToast('Notification permission denied.', 'info');
     }
 }
 
@@ -764,7 +818,7 @@ function updateReceiptLabel(input) {
 
 // CSV Exporter
 function exportCSV() {
-    if (expensesData.length === 0) return alert("No data to export.");
+    if (expensesData.length === 0) return showToast("No data to export.", "info");
     
     let csvContent = "Date,Description,Category,Type,Amount (USD)\n";
     
