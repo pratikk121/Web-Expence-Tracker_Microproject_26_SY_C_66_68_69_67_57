@@ -1,6 +1,10 @@
 <?php
 require_once 'db_connect.php';
+require_once 'csrf_helper.php';
 session_start();
+
+// Verify CSRF for state-changing requests
+verifyCSRF();
 
 header('Content-Type: application/json');
 

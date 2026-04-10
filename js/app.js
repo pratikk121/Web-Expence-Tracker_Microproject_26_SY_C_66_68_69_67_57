@@ -14,6 +14,18 @@ function escapeHTML(str) {
     return div.innerHTML;
 }
 
+// Helper for fetch headers with CSRF protection
+function getAuthHeaders(additionalHeaders = {}) {
+    const headers = {
+        'Content-Type': 'application/json',
+        ...additionalHeaders
+    };
+    if (window.csrfToken) {
+        headers['X-CSRF-Token'] = window.csrfToken;
+    }
+    return headers;
+}
+
 let offlineQueue = JSON.parse(localStorage.getItem('offlineQueue')) || [];
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -340,7 +352,7 @@ async function addExpense(e) {
     try {
         const res = await fetch('api/expenses.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders(),
             body: JSON.stringify(payload)
         });
         const data = await res.json();
@@ -400,7 +412,10 @@ async function deleteExpense(id) {
             return;
         }
 
-        const res = await fetch(`api/expenses.php?id=${id}`, { method: 'DELETE' });
+        const res = await fetch(`api/expenses.php?id=${id}`, { 
+            method: 'DELETE',
+            headers: getAuthHeaders()
+        });
         const data = await res.json();
         if (data.success) {
             loadExpenses();
@@ -477,7 +492,7 @@ async function updateExpense(e) {
 
         const res = await fetch('api/expenses.php', {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders(),
             body: JSON.stringify(payload)
         });
         const data = await res.json();
@@ -523,17 +538,20 @@ async function syncOfflineData() {
             if (q.action === 'POST') {
                 res = await fetch('api/expenses.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify(q.payload)
                 });
             } else if (q.action === 'PUT') {
                 res = await fetch('api/expenses.php', {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify(q.payload)
                 });
             } else if (q.action === 'DELETE') {
-                res = await fetch(`api/expenses.php?id=${q.payload.id}`, { method: 'DELETE' });
+                res = await fetch(`api/expenses.php?id=${q.payload.id}`, { 
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
             }
             
             // Remove success items
@@ -620,7 +638,7 @@ async function promptSetBudget() {
         try {
             await fetch('api/budget.php', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: getAuthHeaders({'Content-Type': 'application/json'}),
                 body: JSON.stringify({budget: monthlyBudget})
             });
         } catch(e) {}

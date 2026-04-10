@@ -44,6 +44,10 @@ async function login(e) {
         if (data.success) {
             localStorage.setItem('offline_user', 'true');
             localStorage.setItem('offline_username', username);
+            // Store CSRF token for the session
+            if (data.data && data.data.csrf_token) {
+                window.csrfToken = data.data.csrf_token;
+            }
             window.location.href = 'index.html';
         } else {
             message.style.color = 'var(--danger-color)';
@@ -62,6 +66,10 @@ async function checkSession() {
         const data = await res.json();
         if (data.success) {
             localStorage.setItem('offline_user', 'true');
+            // Store CSRF token
+            if (data.data && data.data.csrf_token) {
+                window.csrfToken = data.data.csrf_token;
+            }
         } else {
             localStorage.removeItem('offline_user');
         }
@@ -81,3 +89,26 @@ async function logout() {
     localStorage.removeItem('offline_user');
     window.location.href = 'login.html';
 }
+
+// PWA Install Logic
+let deferredPrompt;
+const addBtn = document.getElementById('pwa-install-btn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (addBtn) addBtn.style.display = 'block';
+
+  addBtn.addEventListener('click', (e) => {
+    addBtn.style.display = 'none';
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the A2HS prompt');
+      } else {
+        console.log('User dismissed the A2HS prompt');
+      }
+      deferredPrompt = null;
+    });
+  });
+});

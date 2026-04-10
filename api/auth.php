@@ -3,8 +3,15 @@
 require_once 'db_connect.php';
 session_start();
 
+// Ensure CSRF token exists
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 // Helper to send JSON response
 function sendResponse($success, $message = '', $data = []) {
+    // Include the CSRF token in all responses for the frontend to sync
+    $data['csrf_token'] = $_SESSION['csrf_token'] ?? null;
     echo json_encode(['success' => $success, 'message' => $message, 'data' => $data]);
     exit();
 }
