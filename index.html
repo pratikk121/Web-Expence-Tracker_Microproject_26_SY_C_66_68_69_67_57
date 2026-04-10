@@ -7,8 +7,9 @@
     <title>Dashboard - Expense Tracker</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="manifest" href="manifest.php">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <meta name="theme-color" content="#050505">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -16,6 +17,12 @@
 <body class="hidden"> <!-- Hidden until auth check -->
     <div id="offline-banner" class="offline-banner hidden">
         <i class="fas fa-wifi-slash"></i> You are currently offline. Changes will sync when connection is restored.
+    </div>
+    <div id="sync-banner" class="offline-banner hidden" style="background: rgba(52, 152, 219, 0.4); border-bottom: 1px solid rgba(52, 152, 219, 0.6);">
+        <i class="fas fa-sync fa-spin"></i> Syncing data with server...
+    </div>
+    <div id="update-banner" class="offline-banner hidden" style="background: rgba(255, 255, 255, 0.2); cursor: pointer;" onclick="window.location.reload()">
+        <i class="fas fa-cloud-download-alt"></i> New version available! <u>Click to refresh</u>.
     </div>
     <div id="daily-reminder-banner" class="offline-banner hidden" style="background: rgba(46, 204, 113, 0.2); border-bottom: 1px solid rgba(46, 204, 113, 0.4);">
         <i class="fas fa-bell"></i> Don't forget to log your expenses for today!

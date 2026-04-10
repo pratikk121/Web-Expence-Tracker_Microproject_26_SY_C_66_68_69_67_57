@@ -335,3 +335,8 @@ a:hover {
     transform: translateY(-100%);
     display: block !important;
 }
+
+.offline-banner.sync-success {
+    background: rgba(46, 204, 113, 0.4) !important;
+    border-bottom: 1px solid rgba(46, 204, 113, 0.6) !important;
+}

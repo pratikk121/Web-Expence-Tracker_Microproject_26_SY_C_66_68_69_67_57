@@ -32,7 +32,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Register Service Worker
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js')
-            .then(() => console.log('Service Worker Registered'))
+            .then(reg => {
+                console.log('Service Worker Registered');
+                reg.onupdatefound = () => {
+                    const newWorker = reg.installing;
+                    newWorker.onstatechange = () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // New version available!
+                            const updateBanner = document.getElementById('update-banner');
+                            if (updateBanner) updateBanner.classList.remove('hidden');
+                        }
+                    };
+                };
+            })
             .catch(err => console.log('SW Registration failed', err));
     }
 
@@ -201,7 +213,16 @@ function renderExpenses() {
         const colorClass = isIncome ? 'income' : 'expense';
         const formattedAmount = formatMoney(parseFloat(exp.amount));
 
-        const pendingStar = exp.id < 0 ? '<span title="Pending Sync" style="color:var(--text-muted);font-size:0.8rem;margin-left:5px;"><i class="fas fa-sync"></i></span>' : '';
+        let statusIcon = '';
+        if (exp.id < 0) {
+            // Check if this specific item is currently being synced (passed as global state or local check)
+            if (window.currentlySyncingId === exp.id) {
+                statusIcon = '<span title="Syncing..." style="color:var(--text-muted);font-size:0.8rem;margin-left:5px;"><i class="fas fa-sync fa-spin"></i></span>';
+            } else {
+                statusIcon = '<span title="Pending Sync" style="color:var(--text-muted);font-size:0.8rem;margin-left:5px;"><i class="fas fa-history"></i></span>';
+            }
+        }
+        
         const receiptIcon = exp.receipt_url ? `<a href="${exp.receipt_url}" target="_blank" style="margin-left:5px; color:#3498db;" title="View Receipt"><i class="fas fa-paperclip"></i></a>` : '';
 
         const safeDescription = escapeHTML(exp.description || exp.category_name);
@@ -213,7 +234,7 @@ function renderExpenses() {
                     <i class="fas ${exp.category_icon || 'fa-tag'}"></i>
                 </div>
                 <div class="expense-info">
-                    <strong>${safeDescription} ${pendingStar} ${receiptIcon}</strong>
+                    <strong>${safeDescription} ${statusIcon} ${receiptIcon}</strong>
                     <small>${escapeHTML(exp.date)}</small>
                 </div>
             </div>
@@ -529,10 +550,16 @@ function updateLocalExpense(id, payload, categoryId) {
 async function syncOfflineData() {
     if (offlineQueue.length === 0) return;
 
+    const syncBanner = document.getElementById('sync-banner');
+    if (syncBanner) syncBanner.classList.remove('hidden');
+
     // We process the queue sequentially to maintain order of operations
     const processingQueue = [...offlineQueue];
     
     for (let q of processingQueue) {
+        window.currentlySyncingId = q.fakeId;
+        renderExpenses(); // Update UI to show spinning icon for this item
+
         try {
             let res;
             if (q.action === 'POST') {
@@ -560,13 +587,31 @@ async function syncOfflineData() {
 
         } catch (e) {
             console.error("Sync failed for an item, stopping sync process", e);
+            window.currentlySyncingId = null;
+            if (syncBanner) syncBanner.classList.add('hidden');
+            renderExpenses();
             break; // Stop syncing if connection dies again
         }
     }
 
     if (offlineQueue.length === 0) {
-        console.log("All offline data synced!");
+        window.currentlySyncingId = null;
+        if (syncBanner) {
+            syncBanner.innerHTML = '<i class="fas fa-check-circle"></i> Sync Complete!';
+            syncBanner.classList.add('sync-success');
+            setTimeout(() => {
+                syncBanner.classList.add('hidden');
+                // Recovery original text/style for next sync
+                setTimeout(() => {
+                    syncBanner.classList.remove('sync-success');
+                    syncBanner.innerHTML = '<i class="fas fa-sync fa-spin"></i> Syncing data with server...';
+                }, 400);
+            }, 3000);
+        }
         loadExpenses(); // Refresh with real IDs
+    } else {
+        window.currentlySyncingId = null;
+        renderExpenses();
     }
 }
 
