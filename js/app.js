@@ -70,6 +70,16 @@ async function handleResponse(res, customErrorMsg = 'An unexpected error occurre
         return null;
     }
 
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+        // Probably a tunnel error page or server error
+        console.error('Non-JSON response received:', res.status);
+        if (navigator.onLine) {
+            showToast('Connection to server lost (Tunnel inactive). Working offline.', 'info');
+        }
+        return null; 
+    }
+
     try {
         const data = await res.json();
         if (!res.ok || !data.success) {
@@ -78,6 +88,7 @@ async function handleResponse(res, customErrorMsg = 'An unexpected error occurre
         }
         return data;
     } catch (e) {
+        console.error('JSON Parse error', e);
         showToast(customErrorMsg, 'error');
         return null;
     }
@@ -122,6 +133,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
     document.body.classList.remove('hidden');
+    
+    // Hide loading overlay
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+        overlay.classList.add('fade-out');
+        setTimeout(() => overlay.remove(), 500);
+    }
 
     // Default Date
     const dateInput = document.getElementById('date');

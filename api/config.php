@@ -1,18 +1,19 @@
 <?php
 // api/config.php - Global configuration template
 
-// Default configurations (shared across environments)
+// Default configurations (supports local and environment-based cloud hosting)
 $config = [
     'db' => [
-        'host' => 'localhost',
-        'name' => 'expense_tracker',
-        'user' => 'root',
-        'pass' => '',
+        'host' => getenv('MYSQLHOST') ?: 'localhost',
+        'name' => getenv('MYSQLDATABASE') ?: 'expense_tracker',
+        'user' => getenv('MYSQLUSER') ?: 'root',
+        'pass' => getenv('MYSQLPASSWORD') !== false ? getenv('MYSQLPASSWORD') : '',
+        'port' => getenv('MYSQLPORT') ?: '3306',
         'charset' => 'utf8'
     ],
     'app' => [
-        'debug' => false, // Set to true for local development details
-        'env' => 'production' 
+        'debug' => getenv('APP_DEBUG') === 'true' || true,
+        'env' => getenv('APP_ENV') ?: 'local' 
     ]
 ];
 

@@ -11,8 +11,8 @@ $appConfig = $config['app'];
 header('Content-Type: application/json');
 
 try {
-    // DSN includes charset for security
-    $dsn = "mysql:host={$dbConfig['host']};dbname={$dbConfig['name']};charset={$dbConfig['charset']}";
+    // DSN includes charset and port for security/compatibility
+    $dsn = "mysql:host={$dbConfig['host']};port={$dbConfig['port']};dbname={$dbConfig['name']};charset={$dbConfig['charset']}";
     
     $conn = new PDO($dsn, $dbConfig['user'], $dbConfig['pass']);
     

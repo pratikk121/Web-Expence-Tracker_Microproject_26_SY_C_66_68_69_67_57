@@ -15,6 +15,9 @@
 </head>
 
 <body class="hidden"> <!-- Hidden until auth check -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
     <div id="offline-banner" class="offline-banner hidden">
         <i class="fas fa-wifi-slash"></i> You are currently offline. Changes will sync when connection is restored.
     </div>
@@ -78,20 +81,20 @@
         <main class="main-content">
             <!-- Add Expense Form -->
             <div class="expense-form card">
-                <h3>Add New Transaction</h3>
+                <h3>Add Transaction</h3>
                 <form id="add-expense-form">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-row">
                         <input type="text" id="desc" placeholder="Description" required>
                         <input type="number" id="amount" placeholder="Amount" step="0.01" required>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-row">
                         <select id="category" required>
                             <option value="">Select Category</option>
                             <!-- Populated by JS -->
                         </select>
                         <input type="date" id="date" required>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                    <div class="form-row">
                         <select id="recurring-period">
                             <option value="">One-time (Not Recurring)</option>
                             <option value="weekly">Recurring Weekly</option>
@@ -99,14 +102,14 @@
                             <option value="yearly">Recurring Yearly</option>
                         </select>
                         <div style="display: flex; align-items: center;">
-                            <label for="receipt" style="cursor: pointer; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; width: 100%; text-align: center; color: var(--text-color); font-size: 0.9rem;">
+                            <label for="receipt" class="receipt-btn">
                                 <i class="fas fa-camera"></i> Attach Receipt
                             </label>
                             <input type="file" id="receipt" accept="image/*" capture="environment" style="display: none;" onchange="updateReceiptLabel(this)">
                             <span id="receipt-name" style="margin-left: 10px; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px;"></span>
                         </div>
                     </div>
-                    <button type="submit" style="margin-top: 15px;">Add Transaction</button>
+                    <button type="submit" style="margin-top: 15px;">Add Expense</button>
                 </form>
             </div>
 
@@ -120,7 +123,7 @@
 
             <!-- Recent Transactions -->
             <div class="card">
-                <h3>Recent Transactions</h3>
+                <h3>Activity</h3>
                 <ul id="expense-list" class="expense-list">
                     <!-- Populated by JS -->
                 </ul>
@@ -134,12 +137,16 @@
             <h3>Edit Transaction</h3>
             <form id="edit-expense-form">
                 <input type="hidden" id="edit-id">
-                <input type="text" id="edit-desc" placeholder="Description" required>
-                <input type="number" id="edit-amount" placeholder="Amount" step="0.01" required>
-                <select id="edit-category" required>
-                    <option value="">Select Category</option>
-                </select>
-                <input type="date" id="edit-date" required>
+                <div class="form-row">
+                    <input type="text" id="edit-desc" placeholder="Description" required>
+                    <input type="number" id="edit-amount" placeholder="Amount" step="0.01" required>
+                </div>
+                <div class="form-row">
+                    <select id="edit-category" required>
+                        <option value="">Select Category</option>
+                    </select>
+                    <input type="date" id="edit-date" required>
+                </div>
                 <div style="display: flex; gap: 10px; margin-top: 15px;">
                     <button type="submit" style="background: var(--success-color);">Save</button>
                     <button type="button" onclick="closeEditModal()"

@@ -28,10 +28,20 @@ Standardize API responses to ensure the frontend can gracefully handle all serve
 - **Goals**: Unify JSON response triggers for all endpoints (4xx/5xx handling).
 - **Depends on**: Phase 3
 
-### Phase 6: UI Optimization for Phones
+### Phase 6: UI Optimization for Phones [DONE]
 Refine the mobile user experience to ensure the dashboard is fully responsive and touch-friendly.
 - **Goals**: Optimize layout for small screens; enhance touch targets; improve viewport scaling.
 - **Depends on**: Phase 4
+
+### Phase 9: host on infintyfree.com
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 8
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 9 to break down)
 
 ---
 ## Milestone 2: Feature Expansion (Future)

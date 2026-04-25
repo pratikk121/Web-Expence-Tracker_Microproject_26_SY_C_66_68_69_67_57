@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Expense Tracker</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <meta name="theme-color" content="#050505">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="manifest" href="manifest.php">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <meta name="theme-color" content="#050505">
 </head>
 <body>
     <div id="offline-banner" class="offline-banner hidden">
@@ -22,6 +23,9 @@
             <button type="submit">Login</button>
         </form>
         <p id="message"></p>
+        <button id="pwa-install-btn" style="display: none; margin-top: 15px; background: var(--success-color); color: #fff;">
+            <i class="fas fa-download"></i> Install as App
+        </button>
         <p style="margin-top: 15px;">Don't have an account? <a href="register.html">Register</a></p>
     </div>
     <script src="js/auth.js"></script>

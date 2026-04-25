@@ -1,4 +1,6 @@
-{
+<?php
+header('Content-Type: application/manifest+json');
+?>{
   "name": "Web Expense Tracker",
   "short_name": "Expenses",
   "start_url": "./login.html",

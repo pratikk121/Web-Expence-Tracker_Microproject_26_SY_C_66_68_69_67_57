@@ -1,0 +1,8 @@
+{
+    "name": "pratikk121/web-expense-tracker",
+    "description": "Full-Stack Expense Tracker Web Application designed for students.",
+    "type": "project",
+    "require": {
+        "php": ">=7.4"
+    }
+}
