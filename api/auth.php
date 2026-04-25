@@ -1,7 +1,19 @@
 <?php
 // api/auth.php
 require_once 'db_connect.php';
-session_start();
+
+// Optimize session cookies for cloud deployment
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 86400,
+        'path' => '/',
+        'domain' => '',
+        'secure' => isset($_SERVER['HTTPS']) || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https'),
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+    session_start();
+}
 
 // Ensure CSRF token exists
 if (empty($_SESSION['csrf_token'])) {
